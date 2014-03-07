@@ -1,47 +1,47 @@
 window.onload = function () {
 		var turn = 1;
-		
-		function Player(glyph, col)
-		{
-				this.pieces = []
-				this.piece = function () {
-						var newPiece = dom('i', { class: 'fa fa-' + glyph + ' player', style: 'color: ' + col });
-						this.pieces.push(newPiece);
+		if (typeof Object.create !== 'function') {
+				Object.create = function(o) {
+						var F = function() {};
+						F.prototype = o;
+						return new F ();
+				}
+		}
+
+		var player = function (spec) {
+				var that = spec || {};
+				that.pieces = []
+				that.piece = function () {
+						var newPiece = dom('i', { class: 'fa fa-' + that.glyph + ' player', style: 'color: ' + that.col });
+						that.pieces.push(newPiece);
 						return newPiece;
 				};
-				this.color = col
-		}
-		var playerOne = new Player('bug', 'darkBlue');
-		var playerTwo = new Player('dot-circle-o', 'darkRed');
-		var htmlBody = document.getElementById('board');
-		var elementArray = createBoard(10);
-		for (var x = 0; x < elementArray.length; x++) {
-				htmlBody.appendChild(elementArray[x]);
-		}
-		htmlBody.appendChild(dom('div', {style: 'clear: both;'}));
+				return that;
+		};
 
 		function createBoard(size) {
 				var tableArray = [];
 				var total = size * size;
 				for (var i = 0; i < total; i++) {
-						var node = dom('div', {class: 'box',
-								style: ' height: ' + 100 / size + '%; width: ' + 100 / size + '%;'
-						});
-						registerEventHandler(node, 'click', function (event) {
+						var node = {
+								element: dom('div', {class: 'box',
+										style: ' height: ' + 100 / size + '%; width: ' + 100 / size + '%;'
+								}),
+								position: i
+						};
+						registerEventHandler(node.element, 'click', function (event) {
 								placePiece(this);
 						})
 						tableArray.push(node);
-
 				}
 				return tableArray;
 
 		}
 
 		function placePiece(node) {
-				if(turn%2 === 0)
-						node.appendChild(playerOne.piece());
-				else
-						node.appendChild(playerTwo.piece());
+				if (turn % 2 === 0)
+						node.appendChild(this.playerOne.piece()); else
+						node.appendChild(this.playerTwo.piece());
 				turn++;
 		}
 
@@ -77,4 +77,21 @@ window.onload = function () {
 						node.attachEvent("on" + event, handler);
 		}
 
+
+		var gameMaker = {
+				board: createBoard(10),
+				htmlBody: this.document.getElementById('board'),
+				makeHTML: function(dom){
+						for (var x = 0; x < this.board.length; x++) {
+								this.htmlBody.appendChild(this.board[x]);
+						}
+						this.htmlBody.appendChild(dom('div', {style: 'clear: both;'}));
+				},
+				playerOne: player({glyph: 'bug', col: 'darkBlue'}),
+				playerTwo: player({glyph: 'dot-circle-o', col: 'darkRed'})
+
+		};
+
+		var game = Object.create(gameMaker);
+		game.makeHTML(dom);
 }
