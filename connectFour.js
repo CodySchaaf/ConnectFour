@@ -144,15 +144,6 @@ window.onload = function () {
         return node;
     }
 
-//    function setNodeAttribute(node, attribute, value) {
-//        if (attribute == "class")
-//            node.className = value; else if (attribute == "checked")
-//            node.defaultChecked = value; else if (attribute == "for")
-//            node.htmlFor = value; else if (attribute == "style")
-//            node.style.cssText = value; else
-//            node.setAttribute(attribute, value);
-//    }
-
     //*****************************************************//
     //****************** Helper Methods *******************//
     //*****************************************************//
@@ -162,61 +153,4 @@ window.onload = function () {
                 action(property, object[property]);
         }
     }
-
-//    function registerEventHandler(node, event, handler) {
-//        if (typeof node.addEventListener == "function")
-//            node.addEventListener(event, handler, false); else
-//            node.attachEvent("on" + event, handler);
-//    }
-
-//    function includes(array, dir) {
-//        return array.indexOf(dir) !== -1;
-//
-//    }
-
-    //		function getGridPos(pos,size) {
-//				return {
-//						x: pos % size,
-//						y: pos / size
-//				}
-//		}
-
-//		function posAdd(start,dir){
-//				return getGridPos(start.x + dir.x, start.y + dir.y);
-//		}
-
-    //		function asArray(quasiArray, start) {
-//				var result = [];
-//				for (var i = (start || 0); i < quasiArray.length; i++)
-//						result.push(quasiArray[i]);
-//				return result;
-//		}
-
-    //		function partial(func) {
-//				var fixedArgs = asArray(arguments, 1);
-//				return function () {
-//						return func.apply(null, fixedArgs.concat(asArray(arguments)));
-//				};
-//		}
-
-//		function forEach(array, funct) {
-//				for (var i = 0; i < array.length; i++) {
-//						funct(array[i]);
-//				}
-//		}
-
-//		var op = {
-//				"+": function (a, b) {
-//						return a + b;
-//				},
-//				"==": function (a, b) {
-//						return a == b;
-//				},
-//				"===": function (a, b) {
-//						return a === b;
-//				},
-//				"!": function (a) {
-//						return !a;
-//				}
-//		};
-}
+};
