@@ -3,19 +3,22 @@ window.onload = function () {
 		var size = 10;
 		var player = function (spec) {
 				var that = spec || {};
-				that.pieces = []
+				that.pieces = [];
 				that.piece = function () {
-						var newPiece = dom('i', { class: 'fa fa-' + that.glyph + ' player', style: 'color: ' + that.col });
-						that.pieces.push(newPiece);
-						return newPiece;
+						return newPiece = dom('i', { class: 'fa fa-' + that.glyph + ' player', style: 'color: ' + that.col });
 				};
-				that.checkForWin = function() {
-						var streak = 1;
-						getStreak(that.pieces, streak);
+				that.checkForWin = function () {
+						if (checkWin(that.pieces))
+								alert('Player '+ this + 'won!');
 				};
-				that.addPiece = function(position) {
-						that.pieces.push(gridPos(position,size));
-				}
+				that.addPiece = function (position) {
+						console.log(that.pieces);
+						that.pieces.unshift(position);
+						console.log(that.pieces);
+				};
+				that.resetPieces = (function() {
+						that.pieces = [];
+				}());
 				return that;
 		};
 
@@ -24,11 +27,15 @@ window.onload = function () {
 				playerTwo: player({glyph: 'dot-circle-o', col: 'darkRed'}),
 				board: createBoard(size),
 				htmlBody: this.document.getElementById('board'),
-				makeHTML: function(){
+				makeHTML: function () {
 						for (var x = 0; x < this.board.length; x++) {
 								this.htmlBody.appendChild(this.board[x].element);
 						}
 						this.htmlBody.appendChild(dom('div', {style: 'clear: both;'}));
+				},
+				resetGame: function() {
+						this.playerOne.resetPieces;
+						this.playerTwo.resetPieces;
 				}
 
 		};
@@ -36,49 +43,48 @@ window.onload = function () {
 		var game = Object.create(gameMaker);
 		game.makeHTML();
 
-		function getGridPos(pos,size) {
-				return {
-						x: pos % size,
-						y: pos / size
-				}
-		}
-
-		function posAdd(start,dir){
-				return getGridPos(start.x + dir.x, start.y + dir.y);
-		}
-
-		function partial(func) {
-				var fixedArgs = asArray(arguments, 1);
-				return function(){
-						return func.apply(null, fixedArgs.concat(asArray(arguments)));
-				};
-		}
-
-		function asArray(quasiArray, start) {
-				var result = [];
-				for (var i = (start || 0); i < quasiArray.length; i++)
-						result.push(quasiArray[i]);
-				return result;
-		}
-
 		var directions = {
-				n: gridPos(0,-1),
-				s: gridPos(0,1),
-				e: gridPos(1,0),
-				w: gridPos(-1,0),
-				ne: gridPos(1,-1),
-				se: gridPos(1,1),
-				sw: gridPos(-1,1),
-				nw: gridPos(-1,-1)
+				n_s: (-size),
+				e_w: 1,
+				ne_sw: 1 - size,
+				se_nw: 1 + size
 		}
 
-		function getStreak(array,streak) {
-				var neighbors = []
-				for(dir in directions) {
-						posAdd
+		function add(start, dir) {
+				return parseInt(start) + parseInt(dir);
+		}
+
+		function checkWin(array) {
+				var others = array.slice(1, array.length);
+				var that = array[0];
+				console.log(that);
+				for (var dir in directions) {
+						if (directions.hasOwnProperty(dir)) {
+
+								function checkNeighbors(direction) {
+										return followStreak(that, direction) + followStreak(that, -direction);
+								}
+
+								function followStreak(start, direction, streak) {
+										streak = streak || 0;
+										var newStart = add(start, direction);
+										if (newStart < 0 || newStart > size*size || !includes(others, newStart))
+												return streak; else
+												return followStreak(newStart, direction, add(streak, 1));
+								}
+
+								if (checkNeighbors(directions[dir]) >= 3)
+										return true;
+						}
+
 				}
+				return false;
+
 		}
 
+		//*****************************************************//
+		//***************** Set Up Game Board *****************//
+		//*****************************************************//
 		function createBoard(size) {
 				var tableArray = [];
 				var total = size * size;
@@ -101,11 +107,11 @@ window.onload = function () {
 		function placePiece(node) {
 				if (turn % 2 === 0) {
 						node.appendChild(game.playerOne.piece());
-						game.playerOne.addPiece(node['data-position'])
+						game.playerOne.addPiece(node.attributes['data-position'].value);
 						game.playerOne.checkForWin();
 				} else {
 						node.appendChild(game.playerTwo.piece());
-						game.playerTwo.addPiece(node['data-position'])
+						game.playerTwo.addPiece(node.attributes['data-position'].value);
 						game.playerTwo.checkForWin();
 				}
 				turn++;
@@ -131,6 +137,9 @@ window.onload = function () {
 						node.setAttribute(attribute, value);
 		}
 
+		//*****************************************************//
+		//****************** Helper Methods *******************//
+		//*****************************************************//
 		function forEachIn(object, action) {
 				for (var property in object) {
 						if (object.hasOwnProperty(property))
@@ -138,17 +147,63 @@ window.onload = function () {
 				}
 		}
 
-		function forEach(array, funct) {
-				for (var i = 0; i < array.length; i++) {
-						funct(array[i]);
-				}
-		}
-
 		function registerEventHandler(node, event, handler) {
 				if (typeof node.addEventListener == "function")
-						node.addEventListener(event, handler, false);
-				else
+						node.addEventListener(event, handler, false); else
 						node.attachEvent("on" + event, handler);
 		}
 
+		function includes(array, dir) {
+				for (var i = 0; i < array.length; i++) {
+						if (array[i] == dir)
+								return true;
+				}
+				return false;
+		}
+
+		//		function getGridPos(pos,size) {
+//				return {
+//						x: pos % size,
+//						y: pos / size
+//				}
+//		}
+
+//		function posAdd(start,dir){
+//				return getGridPos(start.x + dir.x, start.y + dir.y);
+//		}
+
+		//		function asArray(quasiArray, start) {
+//				var result = [];
+//				for (var i = (start || 0); i < quasiArray.length; i++)
+//						result.push(quasiArray[i]);
+//				return result;
+//		}
+
+		//		function partial(func) {
+//				var fixedArgs = asArray(arguments, 1);
+//				return function () {
+//						return func.apply(null, fixedArgs.concat(asArray(arguments)));
+//				};
+//		}
+
+//		function forEach(array, funct) {
+//				for (var i = 0; i < array.length; i++) {
+//						funct(array[i]);
+//				}
+//		}
+
+//		var op = {
+//				"+": function (a, b) {
+//						return a + b;
+//				},
+//				"==": function (a, b) {
+//						return a == b;
+//				},
+//				"===": function (a, b) {
+//						return a === b;
+//				},
+//				"!": function (a) {
+//						return !a;
+//				}
+//		};
 }
